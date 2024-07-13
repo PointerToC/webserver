@@ -14,5 +14,5 @@ namespace CurrentThread {
 
   void CacheTid();
 
-  inline int tid();
+  int Tid();
 }

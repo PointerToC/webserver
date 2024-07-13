@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <cstring>
+#include <sys/eventfd.h>
 
 inline void PrintError(const std::string &error_str) {
   std::cerr << error_str << std::endl;
@@ -50,4 +51,13 @@ int CreateSocketFd(int port) {
     HANDLE_ERROR("Listen listen_fd falied");
   }
   return listen_fd;
+}
+
+int CreateWakeUpFd() {
+  int event_fd = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
+  if (event_fd == -1) {
+    HANDLE_ERROR("Create eventfd falied");
+    abort();
+  }
+  return event_fd;
 }

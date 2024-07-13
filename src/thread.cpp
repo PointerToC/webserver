@@ -23,7 +23,7 @@ void CurrentThread::CacheTid() {
   }
 }
 
-inline int CurrentThread::tid() {
+int CurrentThread::Tid() {
   if (__builtin_expect(t_cached_tid_ == 0, 0)) {
     CacheTid();
   }
@@ -42,7 +42,7 @@ struct ThreadData {
     : thread_func_(thread_func), thread_name_(thread_name), tid_(tid), thread_latch_(thread_latch) {}
   
   void RunInThread() {
-    tid_ = CurrentThread::tid();
+    tid_ = CurrentThread::Tid();
     thread_latch_.CountDown();
     // 设置当前的线程名字
     prctl(PR_SET_NAME, thread_name_.c_str());
