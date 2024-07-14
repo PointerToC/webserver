@@ -1,6 +1,7 @@
 #include "thread.h"
 #include "current_thread.h"
 #include "count_down_latch.h"
+#include "common.h"
 
 #include <cassert>
 #include <iostream>
@@ -75,8 +76,8 @@ void Thread::Start() {
   if (err != 0) {
     started_ = false;
     delete thread_data;
-    std::cout << "pthread_created falied! " << strerror(err) << std::endl;
-    exit(EXIT_FAILURE);
+    HANDLE_ERROR("pthread_created failed");
+    abort();
   } else {
     thread_latch_.Wait();
     delete thread_data;

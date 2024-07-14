@@ -6,10 +6,11 @@
 #include <arpa/inet.h>
 #include <cstring>
 #include <sys/eventfd.h>
+#include <signal.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <netinet/tcp.h>
 
-inline void PrintError(const std::string &error_str) {
-  std::cerr << error_str << std::endl;
-}
 
 int CreateSocketFd(int port) {
   if (port < 0 || port > 65535) {
@@ -23,13 +24,10 @@ int CreateSocketFd(int port) {
     return -1;
   }
 
-  // SO_REUSEADDR 选项允许一个 socket 绑定到一个已经在使用的地址和端口上。
-  // 通常在服务器重启时，如果之前使用的地址和端口尚未完全释放，
-  // 设置这个选项可以避免“地址已在使用”错误。
   int optval = 1;
   if (setsockopt(listen_fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1) {
     close(listen_fd);
-    HANDLE_ERROR("Set listen_fd option failed!");
+    HANDLE_ERROR("Set sock addr reuse failed!");
     return -1;
   }
 
@@ -60,4 +58,35 @@ int CreateWakeUpFd() {
     abort();
   }
   return event_fd;
+}
+
+void IgnoreSIGPIPE() {
+  struct sigaction sa;
+  sa.sa_handler = SIG_IGN;
+  sa.sa_flags = 0;
+  if (sigaction(SIGPIPE, &sa, NULL) != 0) {
+    HANDLE_ERROR("Ignore SIGPIPE failed");
+    abort();
+  }
+}
+
+void SetSocketNoBlock(int fd) {
+  int flag = fcntl(fd, F_GETFD, 0);
+  if (flag == -1) {
+    close(fd);
+    HANDLE_ERROR("Get fd flag failed");
+  }
+  flag |= O_NONBLOCK;
+  if (fcntl(fd, F_SETFL, flag) == -1) {
+    close(fd);
+    HANDLE_ERROR("Set fd flag failed");
+  }
+}
+
+void SetSocketNoDelay(int fd) {
+  int enable = 1;
+  if (setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, (void *)(&enable), sizeof(enable)) == -1) {
+    close(fd);
+    HANDLE_ERROR("Set fd no delay failed");
+  }
 }

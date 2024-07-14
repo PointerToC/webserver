@@ -1,27 +1,31 @@
 #pragma once
 
-#include "event_loop.h"
-
 #include <sys/epoll.h>
 #include <functional>
 #include <string>
 #include <poll.h>
 
 
+class EventLoop;
+
 class Channel {
   public:
     typedef std::function<void()> EventCallBack;
 
-    Channel(EventLoop *loop, int fd);
+    explicit Channel(EventLoop *loop, int fd);
     ~Channel();
+    Channel (const Channel&) = delete;
+    Channel &operator=(const Channel&) = delete;
 
     void HandleEvents();
     void SetReadCallBack(const EventCallBack& func);
     void SetWriteCallBack(const EventCallBack& func);
+    void SetConnectCallBack(const EventCallBack& func);
     void SetErrorCallBack(const EventCallBack& func);
     int GetFd();
     int GetEvents() const;
     void SetRevents(int events);
+    void SetEvents(int events);
     bool IsNoneEvent();
     void EnableReading();
     
@@ -39,9 +43,11 @@ class Channel {
     int events_;
     // 目前活动事件
     int revents_;
+    // 
     int index_;
 
-    EventCallBack readCallBack_;
-    EventCallBack writeCallBack_;
-    EventCallBack errorCallBack_;
+    EventCallBack ReadCallBack;
+    EventCallBack WriteCallBack;
+    EventCallBack ConnectCallBack;
+    EventCallBack ErrorCallBack;
 };

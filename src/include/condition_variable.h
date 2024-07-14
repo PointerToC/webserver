@@ -13,6 +13,9 @@ class ConditionVariable {
       pthread_cond_destroy(&condition_); 
     };
 
+    ConditionVariable &operator=(const ConditionVariable &) = delete;
+    ConditionVariable(const ConditionVariable &) = delete;
+
     void Wait() {
       pthread_cond_wait(&condition_, mutex_lock_.GetPtr());
     };
@@ -25,8 +28,6 @@ class ConditionVariable {
       pthread_cond_broadcast(&condition_);
     }
 
-    ConditionVariable &operator=(const ConditionVariable &) = delete;
-    ConditionVariable(const ConditionVariable &) = delete;
   private:
     pthread_cond_t condition_;
     MutexLock &mutex_lock_;

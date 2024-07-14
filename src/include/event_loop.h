@@ -2,8 +2,11 @@
 
 #include "count_down_latch.h"
 #include "common.h"
+#include "epoll.h"
+#include "channel.h"
 
 #include <functional>
+#include <memory>
 
 
 class EventLoop {
@@ -13,6 +16,7 @@ class EventLoop {
     EventLoop &operator=(const EventLoop &) = delete;
     EventLoop (const EventLoop &) = delete;
     
+    void Init();
     // 事件循环
     void Loop();
 
@@ -20,11 +24,20 @@ class EventLoop {
     void AssertInLoopThread();
     bool IsInLoopThread();
 
+    void EpollAdd(std::shared_ptr<Channel> &req, int timeout);
+    void EpollMod(std::shared_ptr<Channel> &req, int timeout);
+    void EpollDel(std::shared_ptr<Channel> &req);
+
   private:
     bool is_looping_;
     const pid_t thread_id_;
     // 用于唤醒本线程
     int wakeup_fd_;
+    std::shared_ptr<Epoll> epoll_;
+    std::shared_ptr<Channel> wakeup_channel_{nullptr};
 
+    void WakeUp();
+    void HandleRead();
+    void HandleConn();
     void AbortNotInLoopThread();
 };
