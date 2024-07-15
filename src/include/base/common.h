@@ -22,9 +22,3 @@ int CreateWakeUpFd();
 // 在服务器程序中，如果客户端意外断开连接，服务器向客户端写数据会导致SIGPIPE信号
 // 默认情况下会终止服务器的进程，通过忽略SIGPIPE信号，服务器可以通过其他的方式来处理这种情况
 void IgnoreSIGPIPE();
-
-// 设置listen_fd为非阻塞模式
-void SetSocketNoBlock(int listen_fd);
-
-// 禁用nagle算法
-void SetSocketNoDelay(int listen_fd);

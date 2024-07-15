@@ -1,6 +1,9 @@
-#include "event_loop_thread_pool.h"
-#include "channel.h"
-#include "event_loop.h"
+#include "./net/event_loop_thread_pool.h"
+#include "./net/channel.h"
+#include "./net/event_loop.h"
+#include "./net/socket.h"
+#include "./net/inet_address.h"
+#include "./net/acceptor.h"
 
 class Server {
   public:
@@ -17,6 +20,10 @@ class Server {
     int thread_num_;
     int listen_fd_;
     bool started_{false};
+
+    InetAddress local_addr_;
+    Socket socket_;
+    
     EventLoop *base_loop_{nullptr};
     std::shared_ptr<Channel> listen_channel_{nullptr};
     std::unique_ptr<EventLoopThreadPool> thread_pool_{nullptr};

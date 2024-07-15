@@ -1,7 +1,7 @@
-#include "thread.h"
-#include "current_thread.h"
-#include "count_down_latch.h"
-#include "common.h"
+#include "./base/thread.h"
+#include "./base/current_thread.h"
+#include "./base/count_down_latch.h"
+#include "./base/common.h"
 
 #include <cassert>
 #include <iostream>

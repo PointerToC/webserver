@@ -1,4 +1,4 @@
-#include "common.h"
+#include "./base/common.h"
 
 #include <iostream>
 #include <sys/socket.h>
@@ -7,9 +7,7 @@
 #include <cstring>
 #include <sys/eventfd.h>
 #include <signal.h>
-#include <fcntl.h>
 #include <sys/types.h>
-#include <netinet/tcp.h>
 
 
 int CreateSocketFd(int port) {
@@ -70,23 +68,3 @@ void IgnoreSIGPIPE() {
   }
 }
 
-void SetSocketNoBlock(int fd) {
-  int flag = fcntl(fd, F_GETFD, 0);
-  if (flag == -1) {
-    close(fd);
-    HANDLE_ERROR("Get fd flag failed");
-  }
-  flag |= O_NONBLOCK;
-  if (fcntl(fd, F_SETFL, flag) == -1) {
-    close(fd);
-    HANDLE_ERROR("Set fd flag failed");
-  }
-}
-
-void SetSocketNoDelay(int fd) {
-  int enable = 1;
-  if (setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, (void *)(&enable), sizeof(enable)) == -1) {
-    close(fd);
-    HANDLE_ERROR("Set fd no delay failed");
-  }
-}
