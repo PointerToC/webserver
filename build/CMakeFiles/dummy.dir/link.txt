@@ -1,1 +1,0 @@
-/usr/bin/g++  -Wall -Wextra CMakeFiles/dummy.dir/dummy.cpp.o -o dummy 

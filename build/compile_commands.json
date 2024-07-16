@@ -1,8 +1,0 @@
-[
-{
-  "directory": "/home/hxz/code/webserver/build",
-  "command": "/usr/bin/g++  -I/home/hxz/code/webserver/src/include  -Wall -Wextra -std=gnu++11 -o CMakeFiles/dummy.dir/dummy.cpp.o -c /home/hxz/code/webserver/build/dummy.cpp",
-  "file": "/home/hxz/code/webserver/build/dummy.cpp",
-  "output": "CMakeFiles/dummy.dir/dummy.cpp.o"
-}
-]
