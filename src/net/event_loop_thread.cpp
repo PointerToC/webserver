@@ -1,4 +1,4 @@
-#include "./net/event_loop_thread.h"
+#include "net/event_loop_thread.h"
 
 
 EventLoopThread::EventLoopThread() : cond_(mutex_) {}

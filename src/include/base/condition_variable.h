@@ -1,6 +1,7 @@
 #pragma once
 
-#include "./base/mutex_lock.h"
+#include "base/mutex_lock.h"
+
 #include <pthread.h>
 
 class ConditionVariable {

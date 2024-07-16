@@ -14,7 +14,7 @@
         std::cerr << "Line: " << __LINE__ << std::endl; \
 
 // 创建listened socket fd, 绑定到制定端口并且开始监听
-int CreateSocketFd(int port);
+int CreateSocketFd();
 
 // 创建event_fd
 int CreateWakeUpFd();

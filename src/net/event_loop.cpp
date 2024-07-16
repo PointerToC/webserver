@@ -1,18 +1,18 @@
-#include "./net/event_loop.h"
-#include "./base/current_thread.h"
-#include "./base/common.h"
+#include "net/event_loop.h"
+#include "base/current_thread.h"
+#include "base/common.h"
 
 
-__thread EventLoop *loop_in_thread = 0;
+__thread EventLoop *loop_in_thread = NULL;
 
 EventLoop::EventLoop() : 
   is_looping_(false),
   thread_id_(CurrentThread::Tid())
   {
-    if (loop_in_thread == 0) {
-      AbortNotInLoopThread();
-    } else {
+    if (loop_in_thread == NULL) {
       loop_in_thread = this;
+    } else {
+      AbortNotInLoopThread();
     }
   }
 
@@ -23,6 +23,7 @@ EventLoop::~EventLoop() {
 
 void EventLoop::Init() {
   epoll_ = std::make_shared<Epoll>();
+  epoll_->Init();
   wakeup_fd_ = CreateWakeUpFd();
   wakeup_channel_ = std::make_shared<Channel>(this, wakeup_fd_);
   wakeup_channel_->SetEvents(EPOLLIN | EPOLLET);
@@ -32,7 +33,7 @@ void EventLoop::Init() {
 }
 
 void EventLoop::Loop() {
-  assert(is_looping_ == false);
+  assert(!is_looping_);
   AssertInLoopThread();
   is_looping_ = true;
   while (is_looping_) {
@@ -41,7 +42,7 @@ void EventLoop::Loop() {
       channel->HandleEvents();
     }
   }
-  is_looping_ = true;
+  is_looping_ = false;
 }
 
 void EventLoop::AssertInLoopThread() {
@@ -62,6 +63,25 @@ void EventLoop::EpollMod(std::shared_ptr<Channel> &req, int timeout) {
 
 void EventLoop::EpollDel(std::shared_ptr<Channel> &req) {
   epoll_->EpollDel(req);
+}
+
+void EventLoop::QueueInLoop(std::function<void()> func) {
+  {
+    MutexLockGuard lck(mtx_);
+    PendingFunc.emplace_back(std::move(func));
+  }
+
+  if (!IsInLoopThread()) {
+    WakeUp();
+  }
+}
+
+void EventLoop::RunInLoop(std::function<void()> func) {
+  if (IsInLoopThread()) {
+    func();
+  } else {
+    QueueInLoop(std::move(func));
+  }
 }
 
 void EventLoop::WakeUp() {

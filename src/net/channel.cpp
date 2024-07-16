@@ -1,4 +1,4 @@
-#include "./net/channel.h"
+#include "net/channel.h"
 
 
 const int Channel::NONE_EVEVT = 0;

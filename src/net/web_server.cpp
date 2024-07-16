@@ -1,4 +1,4 @@
-#include "./net/server.h"
+#include "net/server.h"
 
 int main() {
 

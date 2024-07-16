@@ -1,6 +1,8 @@
 #pragma once
 
-#include "./net/inet_address.h"
+#include "net/inet_address.h"
+
+const int SOCKET_MAX_LISTEN_QUEUE = 128;
 
 class Socket {
   public:
@@ -15,11 +17,15 @@ class Socket {
 
     void SetReusePort();
 
+    void SetReuseAddr();
+
     void BindInetAddress(const InetAddress &inet_addr);
 
     void Listen();
 
-    void Accept(const InetAddress &inet_addr);
+    int Accept(InetAddress &clnt_addr);
+
+    int GetFd() const { return fd_; }
   private:
     const int fd_;
 };

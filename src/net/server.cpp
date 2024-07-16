@@ -1,51 +1,40 @@
-#include "./net/server.h"
+#include "net/server.h"
 
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
+#include <memory>
+#include <functional>
 
-
-Server::Server(int port, int thread_num, EventLoop *base_loop) : 
-  port_(port), thread_num_(thread_num), base_loop_(base_loop) {}
+Server::Server(const InetAddress &listen_addr, int thread_num, EventLoop *loop)
+  : loop_(loop),
+    acceptor_(std::make_unique<Acceptor>(listen_addr, loop)),
+    thread_pool_(std::make_unique<EventLoopThreadPool>(loop_, thread_num)),
+    conn_id_(0)
+    {
+      IgnoreSIGPIPE();
+      acceptor_->SetNewConnectCallBack(std::bind(&Server::HandleNewConnect, this, std::placeholders::_1));
+    }
 
 Server::~Server() {}
 
-void Server::Init() {
-  // init listen_fd_
-  listen_fd_ = CreateSocketFd(port_);
-  listen_channel_ = std::make_shared<Channel>(base_loop_, listen_fd_);
-  listen_channel_->SetEvents(EPOLLIN | EPOLLET);
-  listen_channel_->SetReadCallBack(std::bind(&Server::HandleNewConnect, this));
-  listen_channel_->SetConnectCallBack(std::bind(&Server::HandleThisConnect, this));
-  base_loop_->EpollAdd(listen_channel_, -1);
-  // init thread_pool
-  thread_pool_ = std::make_unique<EventLoopThreadPool>(base_loop_, thread_num_);
-  // ignore SIGPIPE
-  IgnoreSIGPIPE();
-  // set listen_fd no block
-  SetSocketNoBlock(listen_fd_);
-  // 禁用Nagle算法
-  SetSocketNoDelay(listen_fd_);
-}
-
 void Server::Start() {
   thread_pool_->Start();
+  assert(!acceptor_->IsListen());
+  loop_->RunInLoop(std::bind(&Acceptor::Listen, acceptor_.get()));
   started_ = true;
 }
 
-void Server::HandleNewConnect() {
-  assert(started_);
-  struct sockaddr_in clnt_addr;
-  memset(&clnt_addr, 0, sizeof(clnt_addr));
-  socklen_t clnt_addr_size = sizeof(clnt_addr);
-  int accept_fd = -1;
-  while ((accept_fd = accept(listen_fd_, (struct sockaddr *)(&clnt_addr), &clnt_addr_size)) != -1) {
-    SetSocketNoBlock(accept_fd);
-    SetSocketNoDelay(accept_fd);
-    EventLoop *new_loop = thread_pool_->GetNextLoop();
-  }
+void Server::HandleNewConnect(int conn_fd) {
+  loop_->AssertInLoopThread();
+  EventLoop *io_loop = thread_pool_->GetNextLoop();
+  std::string name = "Connection-" + std::to_string(conn_id_);
+  ++conn_id_;
+  std::shared_ptr<TcpConnection> new_conn = std::make_shared<TcpConnection>(name, io_loop, conn_fd);
+  connections_.emplace(name, new_conn);
+  io_loop->RunInLoop(std::bind(&TcpConnection::ConnectionEstablished, new_conn.get()));
 }
 
 void Server::HandleThisConnect() {
-  base_loop_->EpollMod(listen_channel_, -1);
+
 }

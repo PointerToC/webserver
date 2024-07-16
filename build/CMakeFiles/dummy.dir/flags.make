@@ -6,5 +6,5 @@ CXX_DEFINES =
 
 CXX_INCLUDES = -I/home/hxz/code/webserver/src/include
 
-CXX_FLAGS =  -Wall -Wextra -std=gnu++17
+CXX_FLAGS =  -Wall -Wextra -std=gnu++11
 

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "./base/count_down_latch.h"
-#include "./base/common.h"
-#include "./net/epoll.h"
-#include "./net/channel.h"
+#include "base/count_down_latch.h"
+#include "base/common.h"
+#include "net/epoll.h"
+#include "net/channel.h"
 
 #include <functional>
 #include <memory>
@@ -27,6 +27,8 @@ class EventLoop {
     void EpollAdd(std::shared_ptr<Channel> &req, int timeout);
     void EpollMod(std::shared_ptr<Channel> &req, int timeout);
     void EpollDel(std::shared_ptr<Channel> &req);
+    void QueueInLoop(std::function<void()> func);
+    void RunInLoop(std::function<void()> func);
 
   private:
     bool is_looping_;
@@ -35,6 +37,8 @@ class EventLoop {
     int wakeup_fd_;
     std::shared_ptr<Epoll> epoll_;
     std::shared_ptr<Channel> wakeup_channel_{nullptr};
+    std::vector<std::function<void()>> PendingFunc;
+    MutexLock mtx_;
 
     void WakeUp();
     void HandleRead();

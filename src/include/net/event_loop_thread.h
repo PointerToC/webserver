@@ -1,7 +1,7 @@
 #pragma once
 
-#include "./base/thread.h"
-#include "./net/event_loop.h"
+#include "base/thread.h"
+#include "net/event_loop.h"
 
 #include <memory>
 

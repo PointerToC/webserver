@@ -1,6 +1,6 @@
 #pragma once
 
-#include "./net/channel.h"
+#include "net/channel.h"
 
 #include <sys/epoll.h>
 #include <memory>

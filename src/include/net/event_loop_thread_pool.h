@@ -1,7 +1,7 @@
 #pragma once
 
-#include "./net/event_loop_thread.h"
-#include "./base/thread.h"
+#include "net/event_loop_thread.h"
+#include "base/thread.h"
 
 class EventLoopThreadPool {
   public:

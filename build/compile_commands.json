@@ -1,8 +1,8 @@
 [
 {
   "directory": "/home/hxz/code/webserver/build",
-  "command": "/usr/bin/g++  -I/home/hxz/code/webserver/src/include  -Wall -Wextra -std=gnu++17 -o CMakeFiles/webserver.dir/src/thread_pool.cpp.o -c /home/hxz/code/webserver/src/thread_pool.cpp",
-  "file": "/home/hxz/code/webserver/src/thread_pool.cpp",
-  "output": "CMakeFiles/webserver.dir/src/thread_pool.cpp.o"
+  "command": "/usr/bin/g++  -I/home/hxz/code/webserver/src/include  -Wall -Wextra -std=gnu++11 -o CMakeFiles/dummy.dir/dummy.cpp.o -c /home/hxz/code/webserver/build/dummy.cpp",
+  "file": "/home/hxz/code/webserver/build/dummy.cpp",
+  "output": "CMakeFiles/dummy.dir/dummy.cpp.o"
 }
 ]

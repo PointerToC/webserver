@@ -1,33 +1,36 @@
-#include "./net/event_loop_thread_pool.h"
-#include "./net/channel.h"
-#include "./net/event_loop.h"
-#include "./net/socket.h"
-#include "./net/inet_address.h"
-#include "./net/acceptor.h"
+#pragma once
+
+#include "net/event_loop_thread_pool.h"
+#include "net/channel.h"
+#include "net/event_loop.h"
+#include "net/socket.h"
+#include "net/inet_address.h"
+#include "net/acceptor.h"
+#include "net/tcp_connection.h"
+
+#include <memory>
+
 
 class Server {
   public:
-    Server(int port, int thread_num, EventLoop *base_loop);
+    typedef std::function<void()> EventCallBack;
+
+    Server(const InetAddress &listen_addr, int thread_num, EventLoop *base_loop);
     ~Server();
     Server(const Server &) = delete;
     Server &operator=(const Server &) = delete;
 
-    void Init();
     void Start();
 
   private:
-    int port_;
-    int thread_num_;
-    int listen_fd_;
-    bool started_{false};
-
-    InetAddress local_addr_;
-    Socket socket_;
-    
-    EventLoop *base_loop_{nullptr};
-    std::shared_ptr<Channel> listen_channel_{nullptr};
+    EventLoop *loop_{nullptr};
+    std::unique_ptr<Acceptor> acceptor_{nullptr};
     std::unique_ptr<EventLoopThreadPool> thread_pool_{nullptr};
+    std::unordered_map<std::string, std::shared_ptr<TcpConnection>> connections_;
+    bool started_{false};
+    int conn_id_;
 
-    void HandleNewConnect();
+    void HandleNewConnect(int conn_fd);
     void HandleThisConnect();
+
 };
