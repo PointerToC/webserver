@@ -11,12 +11,12 @@
 
 
 int CreateSocketFd() {
-  int listen_fd = 0;
-  if ((listen_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+  int fd = 0;
+  if ((fd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
     HANDLE_ERROR("Create listen_fd failed!");
     return -1;
   }
-  return listen_fd;
+  return fd;
 }
 
 int CreateWakeUpFd() {

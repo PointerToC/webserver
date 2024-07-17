@@ -31,6 +31,4 @@ class Server {
     int conn_id_;
 
     void HandleNewConnect(int conn_fd);
-    void HandleThisConnect();
-
 };

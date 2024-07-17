@@ -1,4 +1,5 @@
 #include "net/channel.h"
+#include "net/event_loop.h"
 
 
 const int Channel::NONE_EVEVT = 0;
@@ -9,9 +10,11 @@ Channel::Channel(EventLoop* loop, int fd) :
   loop_(loop), fd_(fd), events_(0), revents_(0), index_(-1) {}
 
 void Channel::HandleEvents() {
-  // 远端已经关闭链接，同时没有可读数据
+  // 远端已经关闭链接，同时没有可读数据，关闭连接
   if ((revents_ & EPOLLHUP) && !(revents_ & EPOLLIN)) {
-    events_ = 0;
+    if (CloseCallBack) {
+      CloseCallBack();
+    }
     return;
   }
 
@@ -36,48 +39,14 @@ void Channel::HandleEvents() {
     }
   }
 
-  // 重置监听状态
+  // 因为是边缘触发模式，所以需要重置监听状态
   if (ConnectCallBack) {
     ConnectCallBack();
   }
 }
 
-void Channel::SetReadCallBack(const EventCallBack& func) {
-  ReadCallBack = func;
-}
-
-void Channel::SetWriteCallBack(const EventCallBack& func) {
-  WriteCallBack = func;
-}
-
-void Channel::SetConnectCallBack(const EventCallBack& func) {
-  ConnectCallBack = func;
-}
-
-void Channel::SetErrorCallBack(const EventCallBack& func) {
-  ErrorCallBack = func;
-}
-
-int Channel::GetFd() {
-  return fd_;
-}
-
-int Channel::GetEvents() const {
-  return events_;
-}
-
-void Channel::SetRevents(int events) {
-  revents_ = events;
-}
-
-void Channel::SetEvents(int events) {
-  events_ = events;
-}
-
-bool Channel::IsNoneEvent() {
-  
-}
-
 void Channel::EnableReading() {
-
+  SetEvents(EPOLLIN | EPOLLET);
+  auto temp_ptr = shared_from_this();
+  loop_->EpollAdd(temp_ptr, -1);
 }

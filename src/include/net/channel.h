@@ -4,11 +4,12 @@
 #include <functional>
 #include <string>
 #include <poll.h>
+#include <memory>
 
 
 class EventLoop;
 
-class Channel {
+class Channel : public std::enable_shared_from_this<Channel> {
   public:
     typedef std::function<void()> EventCallBack;
 
@@ -18,15 +19,17 @@ class Channel {
     Channel &operator=(const Channel&) = delete;
 
     void HandleEvents();
-    void SetReadCallBack(const EventCallBack& func);
-    void SetWriteCallBack(const EventCallBack& func);
-    void SetConnectCallBack(const EventCallBack& func);
-    void SetErrorCallBack(const EventCallBack& func);
-    int GetFd();
-    int GetEvents() const;
-    void SetRevents(int events);
-    void SetEvents(int events);
-    bool IsNoneEvent();
+    int GetFd() { return fd_; }
+    int GetEvents() const { return events_; }
+    void SetRevents(int events) { revents_ = events; }
+    void SetEvents(int events) { events_ = events; }
+
+    void SetReadCallBack(const EventCallBack& func) { ReadCallBack = func; }
+    void SetWriteCallBack(const EventCallBack& func) { WriteCallBack = func; }
+    void SetCloseCallBack(const EventCallBack& func) { CloseCallBack = func; }
+    void SetErrorCallBack(const EventCallBack& func) { ErrorCallBack = func; }
+    void SetConnectCallBack(const EventCallBack& func) { ConnectCallBack = func; }
+
     void EnableReading();
     
   private:
@@ -41,13 +44,13 @@ class Channel {
     const int fd_;
     // 关心的IO事件
     int events_;
-    // 目前活动事件
+    // 通过epoll->Poll()收集到的活动事件
     int revents_;
-    // 
     int index_;
 
     EventCallBack ReadCallBack;
     EventCallBack WriteCallBack;
+    EventCallBack CloseCallBack;
     EventCallBack ConnectCallBack;
     EventCallBack ErrorCallBack;
 };

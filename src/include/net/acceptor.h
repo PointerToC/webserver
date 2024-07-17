@@ -15,6 +15,7 @@ class Acceptor {
     void Listen();
     bool IsListen() { return is_listen_; }
     void SetNewConnectCallBack(std::function<void(int)> func) { NewConnectCallBack = func; }
+    void HandleThisConnect();
 
   private:
     bool is_listen_{false};

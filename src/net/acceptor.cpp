@@ -15,9 +15,12 @@ Acceptor::Acceptor(const InetAddress &listen_addr, EventLoop *loop)
     socket_.SetReusePort();
     socket_.BindInetAddress(listen_addr);
     channel_->SetReadCallBack(std::bind(&Acceptor::HandleRead, this));
+    channel_->SetConnectCallBack(std::bind(&Acceptor::HandleThisConnect, this));
   }
 
 void Acceptor::Listen() {
+  loop_->AssertInLoopThread();
+  channel_->EnableReading();
   socket_.Listen();
   is_listen_ = true;
 }
@@ -30,4 +33,9 @@ void Acceptor::HandleRead() {
   } else {
     close(conn_fd);
   }
+}
+
+void Acceptor::HandleThisConnect() {
+  channel_->SetEvents(EPOLLIN | EPOLLET);
+  loop_->EpollMod(channel_, -1);
 }
