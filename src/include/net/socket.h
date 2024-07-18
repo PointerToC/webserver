@@ -1,6 +1,7 @@
 #pragma once
 
 #include "net/inet_address.h"
+#include "net/buffer.h"
 
 const int SOCKET_MAX_LISTEN_QUEUE = 128;
 
@@ -26,6 +27,9 @@ class Socket {
     int Accept(InetAddress &clnt_addr);
 
     int GetFd() const { return fd_; }
+
+    int Send(Buffer &buffer, int flag);
+    int Receive(Buffer &buffer, int flag);
   private:
     const int fd_;
 };

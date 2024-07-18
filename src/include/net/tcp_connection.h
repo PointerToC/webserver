@@ -9,8 +9,9 @@
 
 class TcpConnection : public std::enable_shared_from_this<TcpConnection> {
   public:
+    enum IO_BUFFER {INPUT, OUTPUT};
     TcpConnection(const std::string &name, EventLoop *loop, int fd);
-    ~TcpConnection();
+    ~TcpConnection() {}
     TcpConnection(const TcpConnection &) = delete;
     TcpConnection &operator=(const TcpConnection &) = delete;
 
@@ -20,9 +21,6 @@ class TcpConnection : public std::enable_shared_from_this<TcpConnection> {
     void HandleError();
     void HandleThisConnect();
     void ConnectionEstablished();
-    
-    void ReadData(std::string &data);
-    void WriteDate(std::string &data);
 
   private:
     enum TCP_STATE{ CONNECTING, CONNECTED };
@@ -32,8 +30,8 @@ class TcpConnection : public std::enable_shared_from_this<TcpConnection> {
     EventLoop *loop_;
     Socket socket_;
     std::shared_ptr<Channel> channel_;
-    std::unique_ptr<Buffer> input_buffer_;
-    std::unique_ptr<Buffer> output_buffer_;
+    Buffer input_buffer_;
+    Buffer output_buffer_;
     TCP_STATE state_;
 
     void SetStatus(TCP_STATE state) { state_ = state; }

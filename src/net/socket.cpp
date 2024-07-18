@@ -71,3 +71,28 @@ int Socket::Accept(InetAddress &addr) {
   }
   return conn_fd;
 }
+
+int Socket::Send(Buffer &buffer, int flag) {
+  if (buffer.IsEmpty()) {
+    return 0;
+  }
+  int n = send(fd_, buffer.Start(), buffer.DataLen(), flag);
+  buffer.RemoveData(n);
+  return n;
+}
+
+int Socket::Receive(Buffer &buffer, int flag) {
+  int res = 0;
+  int recv_size = 0;
+  buffer.AddSpaceIfFull();
+  while ((recv_size = recv(fd_, buffer.Start(), buffer.UsableSpace(), flag)) > 0) {
+    buffer.AddData(recv_size);
+    buffer.AddSpaceIfFull();
+  }
+  if (recv_size == -1 && errno != EAGAIN && errno != EWOULDBLOCK) {
+    HANDLE_ERROR("Recv error");
+  } else if (recv_size == 0) {
+    res = -1;
+  }
+  return res;
+}

@@ -16,7 +16,7 @@ class Server {
     typedef std::function<void()> EventCallBack;
 
     Server(const InetAddress &listen_addr, int thread_num, EventLoop *base_loop);
-    ~Server();
+    ~Server() {}
     Server(const Server &) = delete;
     Server &operator=(const Server &) = delete;
 

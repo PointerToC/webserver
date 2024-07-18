@@ -5,7 +5,8 @@ TcpConnection::TcpConnection(const std::string &name, EventLoop *loop, int fd)
     loop_(loop),
     socket_(fd),
     channel_(std::make_shared<Channel>(loop_, socket_.GetFd())),
-    state_(CONNECTING) { 
+    state_(CONNECTING)
+    { 
       socket_.SetNoBlock();
       channel_->SetReadCallBack(std::bind(&TcpConnection::HandleRead, shared_from_this()));
       channel_->SetWriteCallBack(std::bind(&TcpConnection::HandleWrite, shared_from_this()));
@@ -15,11 +16,21 @@ TcpConnection::TcpConnection(const std::string &name, EventLoop *loop, int fd)
     }
 
 void TcpConnection::HandleRead() {
-
+  loop_->AssertInLoopThread();
+  assert(state_ == CONNECTED);
+  int flag = socket_.Receive(input_buffer_, 0);
+  if (flag == -1) {
+    // handle close
+  }
 }
 
 void TcpConnection::HandleWrite() {
-
+  loop_->AssertInLoopThread();
+  assert(state_ == CONNECTED);
+  int n = socket_.Send(output_buffer_, 0);
+  if (n == -1) {
+    HANDLE_ERROR("Send msg failed");
+  }
 }
 
 void TcpConnection::HandleClose() {

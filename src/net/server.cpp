@@ -15,8 +15,6 @@ Server::Server(const InetAddress &listen_addr, int thread_num, EventLoop *loop)
       acceptor_->SetNewConnectCallBack(std::bind(&Server::HandleNewConnect, this, std::placeholders::_1));
     }
 
-Server::~Server() {}
-
 void Server::Start() {
   thread_pool_->Start();
   assert(!acceptor_->IsListen());
@@ -33,4 +31,5 @@ void Server::HandleNewConnect(int conn_fd) {
   connections_.emplace(name, new_conn);
   io_loop->RunInLoop(std::bind(&TcpConnection::ConnectionEstablished, new_conn));
 }
+
 

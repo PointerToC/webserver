@@ -38,3 +38,8 @@ void IgnoreSIGPIPE() {
   }
 }
 
+int GetSocketSendBuff(int sock_fd) {
+  int send_buff_size = 0;
+  socklen_t optlen = sizeof(send_buff_size);
+  if (getsockopt(sock_fd, SOL_SOCKET, ))
+}

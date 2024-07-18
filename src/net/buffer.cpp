@@ -1,5 +1,6 @@
 #include "net/buffer.h"
 
+#include <assert.h>
 
 Buffer::Buffer()
   : memo_(DEFAULT_BUFFER_SIZE),
@@ -7,21 +8,23 @@ Buffer::Buffer()
     read_idx_(0) 
     { }
 
-std::string Buffer::ReadData(size_t read_num) {
-  std::string res;
-  while (read_idx_ < write_idx_ && read_num != 0) {
-    res.push_back(memo_[read_idx_]);
-    ++read_idx_;
-    --read_num;
-  }
+void Buffer::AddData(int n) {
+  assert(write_idx_ + n <= memo_.size());
+  write_idx_ += n;
+}
+
+void Buffer::RemoveData(int n) {
+  assert(read_idx_ + n <= write_idx_);
+  read_idx_ += write_idx_;
   if (read_idx_ == write_idx_) {
     read_idx_ = 0;
     write_idx_ = 0;
   }
-  return res;
 }
 
-void Buffer::WriteData(std::string &data) {
-  memo_.insert(memo_.begin() + write_idx_, data.begin(), data.end());
-  write_idx_ += data.size();
+void Buffer::AddSpaceIfFull() {
+  int new_sz = memo_.size() * 2;
+  if (IsFull()) {
+    memo_.resize(new_sz);
+  }
 }
