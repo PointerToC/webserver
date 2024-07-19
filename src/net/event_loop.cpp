@@ -5,16 +5,17 @@
 
 __thread EventLoop *loop_in_thread = NULL;
 
-EventLoop::EventLoop() : 
-  is_looping_(false),
-  thread_id_(CurrentThread::Tid())
-  {
-    if (loop_in_thread == NULL) {
-      loop_in_thread = this;
-    } else {
-      AbortNotInLoopThread();
+EventLoop::EventLoop()
+  : is_looping_(false),
+    is_quit_(false),
+    thread_id_(CurrentThread::Tid())
+    {
+      if (loop_in_thread == NULL) {
+        loop_in_thread = this;
+      } else {
+        AbortNotInLoopThread();
+      }
     }
-  }
 
 EventLoop::~EventLoop() {
   assert(!is_looping_);
@@ -36,13 +37,17 @@ void EventLoop::Loop() {
   assert(!is_looping_);
   AssertInLoopThread();
   is_looping_ = true;
-  while (is_looping_) {
+  while (!is_quit_) {
     std::vector<std::shared_ptr<Channel>> res = epoll_->Poll();
     for (auto &channel : res) {
       channel->HandleEvents();
     }
   }
   is_looping_ = false;
+}
+
+void EventLoop::Quit() {
+  is_quit_ = true;
 }
 
 void EventLoop::AssertInLoopThread() {

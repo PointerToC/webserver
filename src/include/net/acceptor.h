@@ -10,8 +10,8 @@ class Acceptor {
     ~Acceptor();
     Acceptor(const Acceptor &) = delete;
     Acceptor &operator=(const Acceptor &) = delete;
-    void HandleRead();
 
+    void HandleRead();
     void Listen();
     bool IsListen() { return is_listen_; }
     void SetNewConnectCallBack(std::function<void(int)> func) { NewConnectCallBack = func; }

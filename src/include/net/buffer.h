@@ -19,7 +19,7 @@ class Buffer {
     bool IsFull() { return write_idx_ == memo_.size(); }
     void AddData(int n);
     void RemoveData(int n);
-    void AddSpaceIfFull();
+    void IncreaseSpaceIfFull();
     size_t UsableSpace() { return memo_.size() - write_idx_; }
 
   private:

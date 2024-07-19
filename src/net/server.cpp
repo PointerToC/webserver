@@ -16,6 +16,7 @@ Server::Server(const InetAddress &listen_addr, int thread_num, EventLoop *loop)
     }
 
 void Server::Start() {
+  loop_->AssertInLoopThread();
   thread_pool_->Start();
   assert(!acceptor_->IsListen());
   loop_->RunInLoop(std::bind(&Acceptor::Listen, acceptor_));

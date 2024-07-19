@@ -36,6 +36,6 @@ void Acceptor::HandleRead() {
 }
 
 void Acceptor::HandleThisConnect() {
-  channel_->SetEvents(EPOLLIN | EPOLLET);
+  channel_->UpdateEvents();
   loop_->EpollMod(channel_, -1);
 }

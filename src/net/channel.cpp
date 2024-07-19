@@ -6,8 +6,19 @@ const int Channel::NONE_EVEVT = 0;
 const int Channel::READ_EVEVT = POLLIN | POLLPRI;
 const int Channel::WRITE_EVEVT = POLLOUT;
 
-Channel::Channel(EventLoop* loop, int fd) : 
-  loop_(loop), fd_(fd), events_(0), revents_(0), index_(-1) {}
+Channel::Channel(EventLoop* loop, int fd) 
+  : loop_(loop), 
+    fd_(fd), 
+    events_(0), 
+    revents_(0), 
+    new_events_(0), 
+    index_(-1) 
+    { }
+
+void Channel::UpdateEvents() {
+  events_ |= new_events_;
+  new_events_ = 0;
+}
 
 void Channel::HandleEvents() {
   // 远端已经关闭链接，同时没有可读数据，关闭连接
@@ -50,3 +61,10 @@ void Channel::EnableReading() {
   auto temp_ptr = shared_from_this();
   loop_->EpollAdd(temp_ptr, -1);
 }
+
+void Channel::EnableWriting() {
+  SetEvents(EPOLLOUT | EPOLLET);
+  auto temp_ptr = shared_from_this();
+  loop_->EpollAdd(temp_ptr, -1);
+}
+

@@ -1,9 +1,14 @@
 #include "net/event_loop_thread.h"
 
 
-EventLoopThread::EventLoopThread() : cond_(mutex_) {}
+EventLoopThread::EventLoopThread()
+  : loop_(nullptr),
+    thread_(nullptr),
+    cond_(mutex_) {}
 
-EventLoopThread::~EventLoopThread() {}
+EventLoopThread::~EventLoopThread() {
+  thread_->Join();
+}
 
 EventLoop *EventLoopThread::StartLoop() {
   assert(thread_ == nullptr);

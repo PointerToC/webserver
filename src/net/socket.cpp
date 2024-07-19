@@ -82,17 +82,17 @@ int Socket::Send(Buffer &buffer, int flag) {
 }
 
 int Socket::Receive(Buffer &buffer, int flag) {
-  int res = 0;
+  int res = 1; // -1 : error, 0 : close, 1 : success
   int recv_size = 0;
-  buffer.AddSpaceIfFull();
+  buffer.IncreaseSpaceIfFull();
   while ((recv_size = recv(fd_, buffer.Start(), buffer.UsableSpace(), flag)) > 0) {
     buffer.AddData(recv_size);
-    buffer.AddSpaceIfFull();
+    buffer.IncreaseSpaceIfFull();
   }
   if (recv_size == -1 && errno != EAGAIN && errno != EWOULDBLOCK) {
-    HANDLE_ERROR("Recv error");
-  } else if (recv_size == 0) {
     res = -1;
+  } else if (recv_size == 0) {
+    res = 0;
   }
   return res;
 }

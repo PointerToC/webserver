@@ -88,5 +88,6 @@ int Thread::Join() {
   assert(started_);
   assert(!joined_);
   joined_ = true;
+  started_ = false;
   return pthread_join(pthread_id_, NULL);
 }

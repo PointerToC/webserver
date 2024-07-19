@@ -24,6 +24,7 @@ class TcpConnection : public std::enable_shared_from_this<TcpConnection> {
 
   private:
     enum TCP_STATE{ CONNECTING, CONNECTED };
+
     std::string name_;
     InetAddress local_addr_;
     InetAddress peer_addr_;

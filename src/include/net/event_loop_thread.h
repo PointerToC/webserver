@@ -16,8 +16,8 @@ class EventLoopThread {
 
   private:
     void EventLoopThreadFunc();
-    std::unique_ptr<EventLoop> loop_{nullptr};
-    std::unique_ptr<Thread> thread_{nullptr};
+    std::unique_ptr<EventLoop> loop_;
+    std::unique_ptr<Thread> thread_;
     MutexLock mutex_;
     ConditionVariable cond_;
 };

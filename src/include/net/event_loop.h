@@ -19,7 +19,7 @@ class EventLoop {
     void Init();
     // 事件循环
     void Loop();
-
+    void Quit();
     // 每一个线程只能拥有一个EventLoop
     void AssertInLoopThread();
     bool IsInLoopThread();
@@ -27,11 +27,13 @@ class EventLoop {
     void EpollAdd(std::shared_ptr<Channel> &req, int timeout);
     void EpollMod(std::shared_ptr<Channel> &req, int timeout);
     void EpollDel(std::shared_ptr<Channel> &req);
-    void QueueInLoop(std::function<void()> func);
+
     void RunInLoop(std::function<void()> func);
+    void QueueInLoop(std::function<void()> func);
 
   private:
     bool is_looping_;
+    bool is_quit_;
     const pid_t thread_id_;
     // 用于唤醒本线程
     int wakeup_fd_;

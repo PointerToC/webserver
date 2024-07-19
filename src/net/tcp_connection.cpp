@@ -18,8 +18,11 @@ TcpConnection::TcpConnection(const std::string &name, EventLoop *loop, int fd)
 void TcpConnection::HandleRead() {
   loop_->AssertInLoopThread();
   assert(state_ == CONNECTED);
-  int flag = socket_.Receive(input_buffer_, 0);
-  if (flag == -1) {
+  int n = socket_.Receive(input_buffer_, 0);
+  if (n == -1) {
+    HANDLE_ERROR("HandleRead failed");
+    abort();
+  } else if (n == 0) {
     // handle close
   }
 }
@@ -30,6 +33,11 @@ void TcpConnection::HandleWrite() {
   int n = socket_.Send(output_buffer_, 0);
   if (n == -1) {
     HANDLE_ERROR("Send msg failed");
+    abort();
+  }
+  if (!output_buffer_.IsEmpty()) {
+    // 缓冲区中还有待发送数据，需要注册EPOLLOUT事件
+    channel_->AddNewEvents(EPOLLOUT);
   }
 }
 
@@ -38,11 +46,12 @@ void TcpConnection::HandleClose() {
 }
 
 void TcpConnection::HandleError() {
-
+  HANDLE_ERROR("error");
+  abort();
 }
 
 void TcpConnection::HandleThisConnect() { 
-  channel_->SetEvents(EPOLLIN | EPOLLET); 
+  channel_->UpdateEvents(); 
   loop_->EpollMod(channel_, -1);
 }
 
